@@ -25,6 +25,14 @@
       });
     }
   </script>
+  <script src="https://bundle.run/buffer@5.6.0"></script>
+  <script src="eth-sig-util.js" type="application/javascript"></script>
   <script src="main.dart.js" type="application/javascript"></script>
+  <script type="application/javascript">
+    window.ethSigUtil.encryptMessage = function (receiverPublicKey, message, version) {
+      var encryptedMessage = window.ethSigUtil.encrypt(receiverPublicKey, message, version);
+      return '0x' + window.buffer.Buffer.from(JSON.stringify(encryptedMessage),'utf8').toString('hex');
+    }
+  </script>
 </body>
 </html>

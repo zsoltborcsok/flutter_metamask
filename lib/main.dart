@@ -1,4 +1,7 @@
+import 'dart:js_util';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_myapp/src/eth_sig_util.dart';
 import 'package:flutter_myapp/src/meta_mask.dart';
 
 void main() => runApp(MyApp());
@@ -42,6 +45,8 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
   MetaMaskSupport metaMaskSupport;
+  String encryptionPublicKey;
+  String message;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -56,6 +61,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    widget.message = messageController.text;
+    messageController.addListener(() {
+      widget.message = messageController.text;
+    });
   }
 
   @override
@@ -80,10 +89,37 @@ class _MyHomePageState extends State<MyHomePage> {
   // https://github.com/logvik/test-dapp/blob/master/src/index.js
   // https://github.com/ethereum/EIPs/pull/1098
   // https://github.com/MetaMask/eth-json-rpc-middleware/commit/9464aa2085c63b43f1e5ed569bd08b0697c53d39
+  // https://docs.metamask.io/guide/rpc-api.html#other-rpc-methods
   void _encrypt() {
-    if (widget.metaMaskSupport.isMetaMask) {
-      widget.metaMaskSupport.clientVersion();
-      widget.metaMaskSupport.getEncryptionPublicKey();
+    _encryptionPublicKey().then((value) {
+      Map payload = Map();
+      payload["data"] = widget.message;
+      String encryptedMessage = sigUtilEncryptMessage(
+          value, jsify(payload), 'x25519-xsalsa20-poly1305');
+      print(encryptedMessage);
+    });
+  }
+
+  Future<String> _encryptionPublicKey() {
+    if (widget.encryptionPublicKey != null) {
+      return Future.value(widget.encryptionPublicKey);
+    } else if (widget.metaMaskSupport.isMetaMask) {
+      //      widget.metaMaskSupport
+      //          .clientVersion()
+      //          .then((value) => print('clientVersion: ${value}'));
+      return widget.metaMaskSupport.getEncryptionPublicKey().then((result) {
+        widget.encryptionPublicKey = result;
+        print('encryptionPublicKey: ${result}');
+      }).catchError((error) {
+        if (error.code == 4001) {
+          // EIP-1193 userRejectedRequest error
+          print('We can\'t encrypt anything without the key.');
+        } else {
+          print(error);
+        }
+      });
+    } else {
+      return Future.error(Exception('MetaMask is not found!'));
     }
   }
 

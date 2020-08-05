@@ -34,6 +34,7 @@ class MetaMaskSupport {
     }
   }
 
+  // https://eth.wiki/json-rpc/API#json-rpc-methods
   Future<dynamic> send(String method, params) {
     if (isMetaMask) {
       Map payload = Map();
@@ -62,6 +63,7 @@ class MetaMaskSupport {
   }
 
   Future<String> clientVersion() {
+    // Issue: https://github.com/MetaMask/metamask-extension/issues/8993
     return send("web3_clientVersion", Map())
         .then((response) => response.result);
   }
