@@ -1,10 +1,34 @@
 import 'dart:js_util';
 
+import 'package:firebase/firebase.dart';
+import 'package:firebase/firestore.dart' as fs;
 import 'package:flutter/material.dart';
 import 'package:flutter_myapp/src/eth_sig_util.dart';
 import 'package:flutter_myapp/src/meta_mask.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  initializeApp(
+      apiKey: "AIzaSyC9WjOvbIIzNXdQg9-Sv58_cY6WnBfsDoc",
+      authDomain: "flutter-metamask.firebaseapp.com",
+      databaseURL: "https://flutter-metamask.firebaseio.com",
+      projectId: "flutter-metamask",
+      appId: "1:223651377112:web:4a4acb8f4a4c2ebdd14cad",
+      storageBucket: "flutter-metamask.appspot.com");
+
+  fs.Firestore store = firestore();
+  fs.CollectionReference publicKeysRef = store.collection('publicKeys');
+  fs.CollectionReference messagesRef = store.collection('messages');
+
+  messagesRef.onSnapshot.listen((querySnapshot) {
+    querySnapshot.docChanges().forEach((change) {
+      if (change.type == "added") {
+        // Do something with change.doc
+      }
+    });
+  });
+
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
