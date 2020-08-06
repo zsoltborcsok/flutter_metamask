@@ -1,11 +1,11 @@
 {
-    "name": "flutter_myapp",
-    "short_name": "flutter_myapp",
+    "name": "metamask_messenger",
+    "short_name": "metamask_messenger",
     "start_url": ".",
     "display": "minimal-ui",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "A Messenger with MetaMask encryption",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -3,8 +3,8 @@ import 'dart:js_util';
 import 'package:firebase/firebase.dart';
 import 'package:firebase/firestore.dart' as fs;
 import 'package:flutter/material.dart';
-import 'package:flutter_myapp/src/eth_sig_util.dart';
-import 'package:flutter_myapp/src/meta_mask.dart';
+import 'package:metamask_messenger/src/eth_sig_util.dart';
+import 'package:metamask_messenger/src/meta_mask.dart';
 
 void main() {
   initializeApp(
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'MetaMask Messenger',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Ethereum Messenger'),
+      home: MyHomePage(title: 'MetaMask Messenger'),
     );
   }
 }
@@ -133,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //          .then((value) => print('clientVersion: ${value}'));
       return widget.metaMaskSupport.getEncryptionPublicKey().then((result) {
         widget.encryptionPublicKey = result;
-        print('encryptionPublicKey: ${result}');
+        print('encryptionPublicKey: $result');
       }).catchError((error) {
         if (error.code == 4001) {
           // EIP-1193 userRejectedRequest error

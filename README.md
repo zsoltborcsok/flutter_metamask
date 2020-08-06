@@ -1,6 +1,6 @@
-# flutter_myapp
+# metamask_messenger
 
-A new Flutter project.
+A Messenger with MetaMask encryption
 
 ## Getting Started
 

@@ -1,6 +1,6 @@
-package org.nting.flutter.myapp.flutter_myapp;
+package org.nting.metamask_messenger;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugins.GeneratedPluginRegistrant;
