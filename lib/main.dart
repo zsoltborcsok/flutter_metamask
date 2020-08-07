@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:metamask_messenger/widgets/prototype_page.dart';
+import 'package:metamask_messenger/screens/home_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,10 +9,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MetaMask Messenger',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.red,
+        primaryColorLight: Color(0xFFFFEFEE),
+        accentColor: Color(0xFFFEF9EB),
       ),
-      home: PrototypePage(title: 'MetaMask Messenger'),
+      home: HomeScreen(),
     );
   }
 }
