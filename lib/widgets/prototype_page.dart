@@ -3,8 +3,8 @@ import 'dart:js_util';
 import 'package:firebase/firebase.dart';
 import 'package:firebase/firestore.dart' as fs;
 import 'package:flutter/material.dart';
-import 'package:metamask_messenger/src/eth_sig_util.dart';
-import 'package:metamask_messenger/src/meta_mask.dart';
+import 'package:metamask_messenger/utils/eth_sig_util.dart';
+import 'package:metamask_messenger/utils/meta_mask.dart';
 
 class PrototypePage extends StatefulWidget {
   PrototypePage({Key key, this.title}) : super(key: key) {
