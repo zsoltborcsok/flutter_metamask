@@ -65,7 +65,7 @@ class MetaMaskSupport {
   Future<String> clientVersion() {
     // Issue: https://github.com/MetaMask/metamask-extension/issues/8993
     return send("web3_clientVersion", Map())
-        .then((response) => response.result);
+        .then((response) => getProperty(response, "result"));
   }
 
   Future<String> getEncryptionPublicKey() {
@@ -73,7 +73,7 @@ class MetaMaskSupport {
             "eth_getEncryptionPublicKey",
             jsify(
                 [(js.context["web3"]["eth"] as js.JsObject)["defaultAccount"]]))
-        .then((response) => response.result);
+        .then((response) => getProperty(response, "result"));
   }
 }
 
