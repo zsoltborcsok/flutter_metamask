@@ -8,14 +8,6 @@ import 'package:metamask_messenger/utils/meta_mask.dart';
 
 class PrototypePage extends StatefulWidget {
   PrototypePage({Key key, this.title}) : super(key: key) {
-    initializeApp(
-        apiKey: "AIzaSyC9WjOvbIIzNXdQg9-Sv58_cY6WnBfsDoc",
-        authDomain: "flutter-metamask.firebaseapp.com",
-        databaseURL: "https://flutter-metamask.firebaseio.com",
-        projectId: "flutter-metamask",
-        appId: "1:223651377112:web:4a4acb8f4a4c2ebdd14cad",
-        storageBucket: "flutter-metamask.appspot.com");
-
     fs.Firestore store = firestore();
     fs.CollectionReference publicKeysRef = store.collection('publicKeys');
     fs.CollectionReference messagesRef = store.collection('messages');
