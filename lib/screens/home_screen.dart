@@ -3,6 +3,7 @@ import 'package:firebase/firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:metamask_messenger/utils/meta_mask.dart';
+import 'package:metamask_messenger/utils/ui_util.dart';
 import 'package:metamask_messenger/widgets/recent_chats.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -149,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String name = '';
     showDialog(
         context: context,
+        barrierDismissible: false, // user must tap button!
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Edit your registration'),
@@ -187,6 +189,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     ButtonBar(children: <Widget>[
                       FlatButton(
+                        textColor: Theme.of(context).primaryColor,
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      FlatButton(
                           color: Theme.of(context).primaryColor,
                           textColor: Colors.white,
                           child: Text(
@@ -196,9 +208,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed:
                               (currentUser == null || !currentUser.exists)
                                   ? null
-                                  : () {
-                                      _deleteRegistration();
-                                      Navigator.of(context).pop();
+                                  : () async {
+                                      await _deleteRegistration();
+                                      if (currentUser == null ||
+                                          !currentUser.exists) {
+                                        Navigator.of(context).pop();
+                                      }
                                     }),
                       FlatButton(
                         color: Theme.of(context).primaryColor,
@@ -234,10 +249,18 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  _deleteRegistration() {
-    // TODO ask for acknowledge, as it deletes all the chats as well
-    if (currentUser != null || currentUser.exists) {
-      currentUser.ref.delete().then((value) async {
+  _deleteRegistration() async {
+    var approval = await showApproveDialog(
+        context,
+        'Approve deletion',
+        <Widget>[
+          Text(
+              'Deletion of your registration will delete all your chats as well!'),
+          Text('Do you really want to delete the registration?')
+        ],
+        approveText: "Delete");
+    if (approval != null && currentUser != null && currentUser.exists) {
+      await currentUser.ref.delete().then((value) async {
         var documentSnapshot = await currentUser.ref.get();
         setState(() {
           currentUser = documentSnapshot;
