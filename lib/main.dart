@@ -24,6 +24,8 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.red,
         primaryColorLight: Color(0xFFFFEFEE),
         accentColor: Color(0xFFFEF9EB),
+        appBarTheme: AppBarTheme(
+            elevation: 0.0), // In order the elevation on all the AppBars!
       ),
       home:
           HomeScreen(), // TODO: https://flutter.dev/docs/cookbook/design/orientation - OrientationBuilder

@@ -30,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        elevation: 0.0,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
