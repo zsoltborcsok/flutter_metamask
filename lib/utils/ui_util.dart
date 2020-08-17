@@ -8,7 +8,7 @@ Future<String> showApproveDialog(
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(title),
+        title: title == null ? null : Text(title),
         content: SingleChildScrollView(
           child: ListBody(
             children: content,
