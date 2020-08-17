@@ -8,22 +8,15 @@ import 'dart:js_util';
 import 'package:js/js.dart';
 
 // https://docs.metamask.io/guide/getting-started.html#basic-considerations
-// https://docs.metamask.io/guide/ethereum-provider.html
-// https://modulovalue.com/web3js_test_page/#/
+// https://docs.metamask.io/guide/ethereum-provider.html !!!
+// https://medium.com/metamask/breaking-changes-to-the-metamask-inpage-provider-b4dde069dd0a
 class MetaMaskSupport {
   bool hasEthereum;
-  bool hasWeb3;
   bool isMetaMask;
-  bool isMetaMaskEnabled;
 
   MetaMaskSupport() {
     hasEthereum = js.context.hasProperty("ethereum");
-    hasWeb3 = js.context.hasProperty("web3");
     isMetaMask = hasEthereum && js.context["ethereum"]["isMetaMask"];
-    isMetaMaskEnabled = isMetaMask &&
-        (js.context["ethereum"]["_metamask"] as js.JsObject)
-            .callMethod("isEnabled");
-    // 'isEnabled' will be removed: https://medium.com/metamask/breaking-changes-to-the-metamask-inpage-provider-b4dde069dd0a
   }
 
   Future<String> requestAccountAccess() {
@@ -41,8 +34,8 @@ class MetaMaskSupport {
       payload["jsonrpc"] = "2.0";
       payload["method"] = method;
       payload["params"] = params;
-      payload["from"] =
-          (js.context["web3"]["eth"] as js.JsObject)["defaultAccount"];
+      payload["from"] = (js.context["ethereum"]
+          as js.JsObject)["selectedAddress"]; // Deprecated
 
       final completer = Completer<dynamic>();
       _send(
@@ -71,16 +64,17 @@ class MetaMaskSupport {
   Future<String> getEncryptionPublicKey() {
     return send(
             "eth_getEncryptionPublicKey",
-            jsify(
-                [(js.context["web3"]["eth"] as js.JsObject)["defaultAccount"]]))
+            jsify([
+              (js.context["ethereum"] as js.JsObject)["selectedAddress"]
+            ])) // Deprecated
         .then((response) => getProperty(response, "result"));
   }
 }
 
-@JS("ethereum.enable") // Will be replaced by send('eth_requestAccounts') in the new API
+@JS("ethereum.enable") // Will be replaced by send('eth_requestAccounts') in the new API (send -> ethereum.request())
 external dynamic _enable();
 
 // https://github.com/logvik/test-dapp/blob/master/src/index.js
 // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1474.md
-@JS("ethereum.send")
+@JS("ethereum.send") // Also deprecated, use ethereum.request() instead.
 external void _send(payload, callback);
