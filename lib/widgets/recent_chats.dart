@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:metamask_messenger/models/message_model.dart';
-import 'package:metamask_messenger/screens/chat_screen.dart';
 
 class RecentChats extends StatelessWidget {
   @override
@@ -10,6 +8,7 @@ class RecentChats extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
         ),
+/*
         child: ListView.builder(
           padding: EdgeInsets.only(top: 5.0),
           itemCount: chats.length,
@@ -112,6 +111,7 @@ class RecentChats extends StatelessWidget {
             );
           },
         ),
+*/
       ),
     );
   }

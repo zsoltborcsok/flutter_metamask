@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:metamask_messenger/utils/meta_mask.dart';
 import 'package:metamask_messenger/utils/ui_util.dart';
 import 'package:metamask_messenger/widgets/recent_chats.dart';
+import 'package:metamask_messenger/widgets/user_search.dart';
+
+import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final MetaMaskSupport metaMaskSupport = MetaMaskSupport();
@@ -35,7 +38,24 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.search),
             color: Colors.white,
             tooltip: 'Search',
-            onPressed: () {}, // TODO search user/contact to 'start chat'
+            onPressed: (currentUser == null || !currentUser.exists)
+                ? null
+                : () async {
+                    DocumentSnapshot chatPartner = await showSearch(
+                        context: context, delegate: UserSearch(currentUser.id));
+                    if (chatPartner != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            currentUser: currentUser,
+                            chatPartner: chatPartner,
+                          ),
+                        ),
+                      );
+                      // TODO add chatPartner to the recent chats or refresh the recents from the store
+                    }
+                  },
           ),
           PopupMenuButton<HamburgerMenuItem>(
             icon: Icon(Icons.menu),
