@@ -6,6 +6,7 @@ import 'dart:js' as js;
 import 'dart:js_util';
 
 import 'package:js/js.dart';
+import 'package:metamask_messenger/utils/eth_sig_util.dart';
 
 // https://docs.metamask.io/guide/getting-started.html#basic-considerations
 // https://docs.metamask.io/guide/ethereum-provider.html !!!
@@ -68,6 +69,23 @@ class MetaMaskSupport {
               (js.context["ethereum"] as js.JsObject)["selectedAddress"]
             ])) // Deprecated
         .then((response) => getProperty(response, "result"));
+  }
+
+  Future<String> getDecryptedMessage(String encryptedMessage) {
+    return send(
+            "eth_decrypt",
+            jsify([
+              encryptedMessage,
+              (js.context["ethereum"] as js.JsObject)["selectedAddress"]
+            ])) // Deprecated
+        .then((response) => getProperty(response, "result"));
+  }
+
+  String encryptMessage(String message, String publicKey) {
+    Map payload = Map();
+    payload["data"] = message;
+    return sigUtilEncryptMessage(
+        publicKey, jsify(payload), 'x25519-xsalsa20-poly1305');
   }
 }
 

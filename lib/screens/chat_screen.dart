@@ -4,18 +4,23 @@ import 'package:firebase/firebase.dart';
 import 'package:firebase/firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:metamask_messenger/models/message_model.dart';
+import 'package:metamask_messenger/utils/meta_mask.dart';
 
+// TODO: order the messageList based on the time; time formatting; indicate unread messages
 class ChatScreen extends StatefulWidget {
+  final MetaMaskSupport metaMaskSupport;
   final DocumentSnapshot currentUser;
   final DocumentSnapshot chatPartner;
 
-  ChatScreen({this.currentUser, this.chatPartner});
+  ChatScreen(this.metaMaskSupport, this.currentUser, this.chatPartner);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final messageController = TextEditingController();
+
   List<Message> messageList = [];
 
   @override
@@ -26,18 +31,17 @@ class _ChatScreenState extends State<ChatScreen> {
         .collection('messages')
         .where('sender', '==', widget.currentUser.ref)
         .where('receiver', '==', widget.chatPartner.ref)
-        .orderBy('time')
+        .orderBy('time', 'desc')
         .limit(50)
         .onSnapshot;
     Stream<QuerySnapshot> chatMessagesReceived = firestore()
         .collection('messages')
         .where('sender', '==', widget.chatPartner.ref)
         .where('receiver', '==', widget.currentUser.ref)
-        .orderBy('time')
+        .orderBy('time', 'desc')
         .limit(50)
         .onSnapshot;
 
-    // TODO: need to order the messages based on the time (which has an unknown type yet)
     chatMessagesSent.listen((querySnapshot) {
       querySnapshot.docChanges().forEach((change) {
         if (change.type == "added") {
@@ -56,6 +60,12 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       });
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    messageController.dispose();
   }
 
   _buildMessage(Message message, bool isMe) {
@@ -90,7 +100,7 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            message.time,
+            message.time.toIso8601String(),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
@@ -98,12 +108,36 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           SizedBox(height: 8.0),
-          Text(
-            message.sText,
-            style: TextStyle(
-              color: Colors.blueGrey,
-              fontSize: 16.0,
-              fontWeight: FontWeight.w600,
+          GestureDetector(
+            // Use FutureBuilder to 'loadDecryptedText' automatically, which caused error in MetaMask
+            onTap: () {
+              message
+                  .loadDecryptedText(widget.currentUser.ref,
+                      widget.metaMaskSupport.getDecryptedMessage)
+                  .whenComplete(() {
+                if (message.receiver.id == widget.currentUser.id &&
+                    !message.isRead) {
+                  firestore()
+                      .collection('messages')
+                      .doc(message.id)
+                      .update(data: {'isRead': true});
+                }
+                setState(() {});
+              });
+            },
+            child: Text(
+              (() {
+                if (message.text == null || message.text.length == 0) {
+                  return '[Tap to decrypt the message]';
+                } else {
+                  return message.text;
+                }
+              })(),
+              style: TextStyle(
+                color: Colors.blueGrey,
+                fontSize: 16.0,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -115,6 +149,16 @@ class _ChatScreenState extends State<ChatScreen> {
     return Row(
       children: <Widget>[
         msg,
+//        IconButton(
+//          icon: message.isLiked
+//              ? Icon(Icons.favorite)
+//              : Icon(Icons.favorite_border),
+//          iconSize: 30.0,
+//          color: message.isLiked
+//              ? Theme.of(context).primaryColor
+//              : Colors.blueGrey,
+//          onPressed: () {},
+//        )
       ],
     );
   }
@@ -134,8 +178,10 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Expanded(
             child: TextField(
+              autofocus: true,
+              controller: messageController,
               textCapitalization: TextCapitalization.sentences,
-              onChanged: (value) {},
+              maxLines: null, // keyboardType: TextInputType.multiline
               decoration: InputDecoration.collapsed(
                 hintText: 'Send a message...',
               ),
@@ -145,11 +191,32 @@ class _ChatScreenState extends State<ChatScreen> {
             icon: Icon(Icons.send),
             iconSize: 25.0,
             color: Theme.of(context).primaryColor,
-            onPressed: () {},
+            onPressed: () {
+              _createMessage();
+            },
           ),
         ],
       ),
     );
+  }
+
+  _createMessage() {
+    if (0 < messageController.text.length) {
+      firestore()
+          .collection('messages')
+          .add(Message(
+                  null,
+                  widget.currentUser.ref,
+                  widget.chatPartner.ref,
+                  widget.metaMaskSupport.encryptMessage(
+                      messageController.text, widget.currentUser.id),
+                  widget.metaMaskSupport.encryptMessage(
+                      messageController.text, widget.chatPartner.id),
+                  DateTime.now(),
+                  false)
+              .toFireStore())
+          .whenComplete(() => messageController.text = '');
+    }
   }
 
   @override

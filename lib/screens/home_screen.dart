@@ -48,8 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => ChatScreen(
-                            currentUser: currentUser,
-                            chatPartner: chatPartner,
+                            widget.metaMaskSupport,
+                            currentUser,
+                            chatPartner,
                           ),
                         ),
                       );
