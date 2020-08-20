@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:metamask_messenger/models/message_model.dart';
 import 'package:metamask_messenger/utils/meta_mask.dart';
 
-// TODO: order the messageList based on the time; time formatting; indicate unread messages
+// TODO: time formatting; indicate unread messages
 class ChatScreen extends StatefulWidget {
   final MetaMaskSupport metaMaskSupport;
   final DocumentSnapshot currentUser;
@@ -59,6 +59,14 @@ class _ChatScreenState extends State<ChatScreen> {
           });
         }
       });
+    });
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(() {
+      fn();
+      messageList.sort((a, b) => -a.time.compareTo(b.time));
     });
   }
 
