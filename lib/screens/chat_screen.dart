@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:metamask_messenger/models/message_model.dart';
 import 'package:metamask_messenger/utils/meta_mask.dart';
 
-// TODO: time formatting; indicate unread messages
+// TODO: time formatting; indicate unread messages; load more messages by scrolling(?);
 class ChatScreen extends StatefulWidget {
   final MetaMaskSupport metaMaskSupport;
   final DocumentSnapshot currentUser;
@@ -91,9 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
       width: MediaQuery.of(context).size.width * 0.75,
       decoration: BoxDecoration(
-        color: isMe
-            ? Theme.of(context).accentColor
-            : Theme.of(context).primaryColorLight,
+        color: isMe ? Theme.of(context).accentColor : Theme.of(context).primaryColorLight,
         borderRadius: isMe
             ? BorderRadius.only(
                 topLeft: Radius.circular(15.0),
@@ -120,15 +118,10 @@ class _ChatScreenState extends State<ChatScreen> {
             // Use FutureBuilder to 'loadDecryptedText' automatically, which caused error in MetaMask
             onTap: () {
               message
-                  .loadDecryptedText(widget.currentUser.ref,
-                      widget.metaMaskSupport.getDecryptedMessage)
+                  .loadDecryptedText(widget.currentUser.ref, widget.metaMaskSupport.getDecryptedMessage)
                   .whenComplete(() {
-                if (message.receiver.id == widget.currentUser.id &&
-                    !message.isRead) {
-                  firestore()
-                      .collection('messages')
-                      .doc(message.id)
-                      .update(data: {'isRead': true});
+                if (message.receiver.id == widget.currentUser.id && !message.isRead) {
+                  firestore().collection('messages').doc(message.id).update(data: {'isRead': true});
                 }
                 setState(() {});
               });
@@ -216,10 +209,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   null,
                   widget.currentUser.ref,
                   widget.chatPartner.ref,
-                  widget.metaMaskSupport.encryptMessage(
-                      messageController.text, widget.currentUser.id),
-                  widget.metaMaskSupport.encryptMessage(
-                      messageController.text, widget.chatPartner.id),
+                  widget.metaMaskSupport.encryptMessage(messageController.text, widget.currentUser.id),
+                  widget.metaMaskSupport.encryptMessage(messageController.text, widget.chatPartner.id),
                   DateTime.now(),
                   false)
               .toFireStore())
@@ -264,8 +255,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemCount: messageList.length,
                   itemBuilder: (BuildContext context, int index) {
                     final Message message = messageList[index];
-                    final bool isMe =
-                        message.sender.id == widget.currentUser.id;
+                    final bool isMe = message.sender.id == widget.currentUser.id;
                     return _buildMessage(message, isMe);
                   },
                 ),

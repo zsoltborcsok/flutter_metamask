@@ -41,8 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: (currentUser == null || !currentUser.exists)
                 ? null
                 : () async {
-                    DocumentSnapshot chatPartner = await showSearch(
-                        context: context, delegate: UserSearch(currentUser.id));
+                    DocumentSnapshot chatPartner =
+                        await showSearch(context: context, delegate: UserSearch(currentUser.id));
                     if (chatPartner != null) {
                       Navigator.push(
                         context,
@@ -54,7 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       );
-                      // TODO add chatPartner to the recent chats or refresh the recents from the store
                     }
                   },
           ),
@@ -81,8 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   break;
               }
             },
-            itemBuilder: (BuildContext context) =>
-                <PopupMenuEntry<HamburgerMenuItem>>[
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<HamburgerMenuItem>>[
               PopupMenuItem<HamburgerMenuItem>(
                 value: HamburgerMenuItem.connect,
                 child: Text(
@@ -118,25 +116,29 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              children: <Widget>[
-                RecentChats(),
-              ],
-            ),
-          ),
-        ],
+        children: (() {
+          if (currentUser != null && currentUser.exists) {
+            return <Widget>[
+              RecentChats(widget.metaMaskSupport, currentUser),
+            ];
+          } else {
+            return <Widget>[
+              Expanded(
+                child: Container(
+                    decoration: BoxDecoration(
+                  color: Colors.white,
+                )),
+              )
+            ];
+          }
+        })(),
       ),
     );
   }
 
   void _connectToMetaMask() {
     if (widget.metaMaskSupport.isMetaMask) {
-      widget.metaMaskSupport
-          .requestAccountAccess()
-          .then((value) => _encryptionPublicKey())
-          .then((publicKey) async {
+      widget.metaMaskSupport.requestAccountAccess().then((value) => _encryptionPublicKey()).then((publicKey) async {
         var documentSnapshot = await firestore().doc('/users/$publicKey').get();
         setState(() {
           metaMaskPublicKey = publicKey;
@@ -150,9 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (metaMaskPublicKey != null) {
       return Future.value(metaMaskPublicKey);
     } else if (widget.metaMaskSupport.isMetaMask) {
-      return widget.metaMaskSupport
-          .getEncryptionPublicKey()
-          .catchError((error) {
+      return widget.metaMaskSupport.getEncryptionPublicKey().catchError((error) {
         if (error.code == 4001) {
           // EIP-1193 userRejectedRequest error
           print('We can\'t encrypt anything without the key.');
@@ -177,8 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
             content: RawKeyboardListener(
               focusNode: FocusNode(),
               onKey: (event) {
-                if (event.runtimeType == RawKeyDownEvent &&
-                    (event.logicalKey == LogicalKeyboardKey.escape)) {
+                if (event.runtimeType == RawKeyDownEvent && (event.logicalKey == LogicalKeyboardKey.escape)) {
                   Navigator.of(context).pop();
                 }
               },
@@ -189,8 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: <Widget>[
                     TextFormField(
                       initialValue: metaMaskPublicKey,
-                      decoration: InputDecoration(
-                          labelText: "Public key of your account:"),
+                      decoration: InputDecoration(labelText: "Public key of your account:"),
                       enabled: false,
                     ),
                     TextFormField(
@@ -225,16 +223,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             "Delete",
                             style: TextStyle(fontSize: 20),
                           ),
-                          onPressed:
-                              (currentUser == null || !currentUser.exists)
-                                  ? null
-                                  : () async {
-                                      await _deleteRegistration();
-                                      if (currentUser == null ||
-                                          !currentUser.exists) {
-                                        Navigator.of(context).pop();
-                                      }
-                                    }),
+                          onPressed: (currentUser == null || !currentUser.exists)
+                              ? null
+                              : () async {
+                                  await _deleteRegistration();
+                                  if (currentUser == null || !currentUser.exists) {
+                                    Navigator.of(context).pop();
+                                  }
+                                }),
                       FlatButton(
                         color: Theme.of(context).primaryColor,
                         textColor: Colors.white,
@@ -260,8 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _updateRegistration(String name) {
-    currentUser.ref
-        .set({'name': name}, SetOptions(merge: true)).then((value) async {
+    currentUser.ref.set({'name': name}, SetOptions(merge: true)).then((value) async {
       var documentSnapshot = await currentUser.ref.get();
       setState(() {
         currentUser = documentSnapshot;
@@ -274,8 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         'Approve deletion',
         <Widget>[
-          Text(
-              'Deletion of your registration will delete all your chats as well!'),
+          Text('Deletion of your registration will delete all your chats as well!'),
           Text('Do you really want to delete the registration?')
         ],
         approveText: "Delete");
