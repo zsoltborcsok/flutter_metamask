@@ -4,6 +4,7 @@ library meta_mask; // required library declaration
 import 'dart:async';
 import 'dart:js' as js;
 import 'dart:js_util';
+import 'dart:math';
 
 import 'package:js/js.dart';
 import 'package:metamask_messenger/utils/eth_sig_util.dart';
@@ -35,15 +36,13 @@ class MetaMaskSupport {
       payload["jsonrpc"] = "2.0";
       payload["method"] = method;
       payload["params"] = params;
-      payload["from"] = (js.context["ethereum"]
-          as js.JsObject)["selectedAddress"]; // Deprecated
+      payload["from"] = (js.context["ethereum"] as js.JsObject)["selectedAddress"]; // Deprecated
 
       final completer = Completer<dynamic>();
       _send(
           jsify(payload),
           allowInterop((err, response) => () {
-                (js.context["console"] as js.JsObject)
-                    .callMethod("log", <dynamic>[err, response]);
+                (js.context["console"] as js.JsObject).callMethod("log", <dynamic>[err, response]);
                 if (err == null) {
                   completer.complete(response);
                 } else {
@@ -56,36 +55,30 @@ class MetaMaskSupport {
     }
   }
 
-  Future<String> clientVersion() {
-    // Issue: https://github.com/MetaMask/metamask-extension/issues/8993
-    return send("web3_clientVersion", Map())
-        .then((response) => getProperty(response, "result"));
-  }
-
   Future<String> getEncryptionPublicKey() {
-    return send(
-            "eth_getEncryptionPublicKey",
-            jsify([
-              (js.context["ethereum"] as js.JsObject)["selectedAddress"]
-            ])) // Deprecated
+    return send("eth_getEncryptionPublicKey",
+            jsify([(js.context["ethereum"] as js.JsObject)["selectedAddress"]])) // Deprecated
         .then((response) => getProperty(response, "result"));
   }
 
   Future<String> getDecryptedMessage(String encryptedMessage) {
-    return send(
-            "eth_decrypt",
-            jsify([
-              encryptedMessage,
-              (js.context["ethereum"] as js.JsObject)["selectedAddress"]
-            ])) // Deprecated
+    return send("eth_decrypt",
+            jsify([encryptedMessage, (js.context["ethereum"] as js.JsObject)["selectedAddress"]])) // Deprecated
         .then((response) => getProperty(response, "result"));
   }
 
   String encryptMessage(String message, String publicKey) {
     Map payload = Map();
     payload["data"] = message;
-    return sigUtilEncryptMessage(
-        publicKey, jsify(payload), 'x25519-xsalsa20-poly1305');
+    return sigUtilEncryptMessage(publicKey, jsify(payload), 'x25519-xsalsa20-poly1305');
+  }
+
+  Future<dynamic> sendTransaction(String to, double ethValue) {
+    Map params = Map();
+    params["from"] = (js.context["ethereum"] as js.JsObject)["selectedAddress"]; // Deprecated
+    params["to"] = to;
+    params["value"] = (ethValue * pow(10, 18)).round().toRadixString(16);
+    return send("eth_sendTransaction", [params]).then((response) => getProperty(response, "result"));
   }
 }
 

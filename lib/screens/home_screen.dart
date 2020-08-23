@@ -108,9 +108,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 enabled: metaMaskPublicKey != null && metaMaskPublicKey != "",
               ),
               const PopupMenuDivider(),
-              const PopupMenuItem<HamburgerMenuItem>(
+              PopupMenuItem<HamburgerMenuItem>(
                 value: HamburgerMenuItem.donate,
                 child: Text('Donate'),
+                enabled: metaMaskPublicKey != null && metaMaskPublicKey != "",
               ),
             ],
           )
@@ -286,6 +287,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _donate() {
-    // TODO
+    widget.metaMaskSupport.sendTransaction('0x77fdC17eE89AD6420F88eDC36f036282E1F7562D', 0.01);
   }
 }
