@@ -2,6 +2,7 @@ import 'package:firebase/firebase.dart';
 import 'package:firebase/firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:metamask_messenger/utils/firestore_util.dart';
 import 'package:metamask_messenger/utils/meta_mask.dart';
 import 'package:metamask_messenger/utils/ui_util.dart';
 import 'package:metamask_messenger/widgets/recent_chats.dart';
@@ -88,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (metaMaskPublicKey == null || metaMaskPublicKey == "") {
                       return 'Connect to MetaMask';
                     } else {
-                      return 'Account: ${metaMaskPublicKey.substring(0, 16)}...';
+                      return 'Account: ${unEscape(metaMaskPublicKey).substring(0, 16)}...';
                     }
                   })(),
                   maxLines: 1,
@@ -139,6 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _connectToMetaMask() {
     if (widget.metaMaskSupport.isMetaMask) {
       widget.metaMaskSupport.requestAccountAccess().then((value) => _encryptionPublicKey()).then((publicKey) async {
+        publicKey = escape(publicKey); // documentId-s should not contain forward slashes, so escape them
         var documentSnapshot = await firestore().doc('/users/$publicKey').get();
         setState(() {
           metaMaskPublicKey = publicKey;
@@ -187,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     TextFormField(
-                      initialValue: metaMaskPublicKey,
+                      initialValue: unEscape(metaMaskPublicKey),
                       decoration: InputDecoration(labelText: "Public key of your account:"),
                       enabled: false,
                     ),

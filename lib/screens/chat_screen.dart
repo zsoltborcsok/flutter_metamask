@@ -4,6 +4,7 @@ import 'package:firebase/firebase.dart';
 import 'package:firebase/firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:metamask_messenger/models/message_model.dart';
+import 'package:metamask_messenger/utils/firestore_util.dart';
 import 'package:metamask_messenger/utils/meta_mask.dart';
 
 // TODO: time formatting; indicate unread messages; load more messages by scrolling(?);
@@ -209,8 +210,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   null,
                   widget.currentUser.ref,
                   widget.chatPartner.ref,
-                  widget.metaMaskSupport.encryptMessage(messageController.text, widget.currentUser.id),
-                  widget.metaMaskSupport.encryptMessage(messageController.text, widget.chatPartner.id),
+                  widget.metaMaskSupport.encryptMessage(messageController.text, unEscape(widget.currentUser.id)),
+                  widget.metaMaskSupport.encryptMessage(messageController.text, unEscape(widget.chatPartner.id)),
                   DateTime.now(),
                   false)
               .toFireStore())

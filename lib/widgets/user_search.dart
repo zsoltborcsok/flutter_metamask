@@ -1,6 +1,7 @@
 import 'package:firebase/firebase.dart';
 import 'package:firebase/firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:metamask_messenger/utils/firestore_util.dart';
 
 // No full text search - https://medium.com/@ken11zer01/firebase-firestore-text-search-and-pagination-91a0df8131ef
 class UserSearch extends SearchDelegate<DocumentSnapshot> {
@@ -13,15 +14,13 @@ class UserSearch extends SearchDelegate<DocumentSnapshot> {
     // https://github.com/flutter/flutter/issues/19734 - guojiex commented on Jan 17 2019
     ThemeData theme = Theme.of(context);
     return theme.copyWith(
-        inputDecorationTheme: InputDecorationTheme(
-            hintStyle: TextStyle(color: theme.primaryTextTheme.title.color)),
+        inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: theme.primaryTextTheme.title.color)),
         primaryColor: theme.primaryColor,
         primaryIconTheme: theme.primaryIconTheme,
         primaryColorBrightness: theme.primaryColorBrightness,
         primaryTextTheme: theme.primaryTextTheme,
-        textTheme: theme.textTheme.copyWith(
-            headline6: theme.textTheme.headline6
-                .copyWith(color: theme.primaryTextTheme.headline6.color)));
+        textTheme: theme.textTheme
+            .copyWith(headline6: theme.textTheme.headline6.copyWith(color: theme.primaryTextTheme.headline6.color)));
   }
 
   @override
@@ -94,7 +93,7 @@ class UserSearch extends SearchDelegate<DocumentSnapshot> {
               var result = results[index];
               return ListTile(
                 title: Text(result.get('name')),
-                subtitle: Text(result.id),
+                subtitle: Text(unEscape(result.id)),
                 enabled: result.id != _currentUserId,
                 onTap: () {
                   close(context, result);
